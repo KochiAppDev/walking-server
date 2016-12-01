@@ -38,7 +38,7 @@ router.post('/', function(request, response, next) {
                                     response.json({ "result": 1 });
                                     
                                     client.query(
-                                        "SELECT * FROM user_info WHERE group_id=$1 ORDER BY user_type",
+                                        "SELECT user_id as id, user_name as name, user_type as type, icon, group_id as group, token FROM user_info WHERE group_id=$1 ORDER BY user_type",
                                         [group_id],
                                         function(err, result) {
                                             if (err) {
@@ -46,7 +46,7 @@ router.post('/', function(request, response, next) {
                                                 client.end();
                                             } else {
                                                 if (result.rows.length == 1) {
-                                                    var single = result.rows[0].user_id;
+                                                    var single = result.rows[0].id;
                                                     var ids = result.rows[0].token;
                                                     client.query(
                                                         "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id=$1",
@@ -79,7 +79,6 @@ router.post('/', function(request, response, next) {
                                                     for (var j = 0; j < result.rows.length; j++) {
                                                         ids[j] = result.rows[j].token;
                                                     }
-                                                    console.log("###" + ids);
                                                     var payload = {
                                                         registration_ids:ids,
                                                         data: {
