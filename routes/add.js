@@ -25,7 +25,7 @@ router.post('/', function(request, response, next) {
                     response.json({ "group_id": group_id });
 
                     client.query(
-                        "SELECT * FROM user_info WHERE group_id=$1 ORDER BY user_type",
+                        "SELECT user_id as id, user_name as name, user_type as type, icon, group_id as group, token FROM user_info WHERE group_id=$1 ORDER BY user_type",
                         [group_id],
                         function(err, result) {
                             if (err) {
@@ -36,17 +36,13 @@ router.post('/', function(request, response, next) {
                                 for (var j = 0; j < result.rows.length; j++) {
                                     ids[j] = result.rows[j].token;
                                 }
-                                console.log("###" + ids);
-                                var data = {
-                                    order : "group",
-                                    group : group_id
-                                };
 
                                var payloadMulticast = {
                                    registration_ids:ids,
                                    data: {
                                        order : "group",
-                                       group : group_id
+                                       group : group_id,
+                                       member: JSON.stringify(result.rows)
                                    },
                                     priority: 'high',
                                     content_available: true,

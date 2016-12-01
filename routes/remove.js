@@ -61,7 +61,7 @@ router.post('/', function(request, response, next) {
                                                                     data: {
                                                                         order : "group",
                                                                         group : group_id,
-                                                                        member: []
+                                                                        member: JSON.stringify([])
                                                                     },
                                                                     priority: 'high',
                                                                     content_available: true,
