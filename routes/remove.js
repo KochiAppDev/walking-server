@@ -45,26 +45,58 @@ router.post('/', function(request, response, next) {
                                                 console.log(err);
                                                 client.end();
                                             } else {
-                                                var ids = [];
-                                                for (var j = 0; j < result.rows.length; j++) {
-                                                    ids[j] = result.rows[j].token;
-                                                }
-                                                console.log("###" + ids);
-                                                var payloadMulticast = {
-                                                    registration_ids:ids,
-                                                    data: {
-                                                        order : "group",
-                                                        group : group_id
-                                                    },
-                                                    priority: 'high',
-                                                    content_available: true,
-                                                    notification: { sound : "", badge: "0" }
-                                                };
+                                                if (result.rows.length == 1) {
+                                                    var single = result.rows[0].user_id;
+                                                    var ids = result.rows[0].token;
+                                                    client.query(
+                                                        "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id=$1",
+                                                        [single],
+                                                        function(err, result) {
+                                                            if (err) {
+                                                                console.log(err);
+                                                                client.end();
+                                                            } else {
+                                                                var payload = {
+                                                                    to:ids,
+                                                                    data: {
+                                                                        order : "group",
+                                                                        group : group_id,
+                                                                        member: []
+                                                                    },
+                                                                    priority: 'high',
+                                                                    content_available: true,
+                                                                    notification: { sound : "", badge: "0" }
+                                                                };
+                                                                fcmCli.send(payload,function(err,res){
+                                                                    console.log("###[ err=" + err + ", res=" + res + "]");
+                                                                });
+                                                                client.end();
+                                                            }
+                                                        }
+                                                    );
+                                                } else {
+                                                    var ids = [];
+                                                    for (var j = 0; j < result.rows.length; j++) {
+                                                        ids[j] = result.rows[j].token;
+                                                    }
+                                                    console.log("###" + ids);
+                                                    var payload = {
+                                                        registration_ids:ids,
+                                                        data: {
+                                                            order : "group",
+                                                            group : group_id,
+                                                            member: JSON.stringify(result.rows)
+                                                        },
+                                                        priority: 'high',
+                                                        content_available: true,
+                                                        notification: { sound : "", badge: "0" }
+                                                    };
                                                 
-                                                fcmCli.send(payloadMulticast,function(err,res){
-                                                    console.log("###[ err=" + err + ", res=" + res + "]");
-                                                });
-                                                client.end();
+                                                    fcmCli.send(payload,function(err,res){
+                                                        console.log("###[ err=" + err + ", res=" + res + "]");
+                                                    });
+                                                    client.end();
+                                                }
                                             }
                                         }
                                     );
