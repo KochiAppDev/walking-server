@@ -3,10 +3,10 @@ var router = express.Router();
 var pg = require('pg');
  
 router.get('/', function(request, response, next) {
-    var device_id = request.params.id;
-    var token = request.params.tk;
-    var os = request.params.os;
-    var ver = request.params.vr;
+    var device_id = request.query.id;
+    var token = request.query.tk;
+    var os = request.query.os;
+    var ver = request.query.vr;
     console.log("#" + device_id + ":" + token + "$" + os + ":" + ver);
     
     var con = process.env.DATABASE_URL;
