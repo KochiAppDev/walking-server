@@ -7,6 +7,7 @@ router.get('/', function(request, response, next) {
     var token = request.params.tk;
     var os = request.params.os;
     var ver = request.params.vr;
+    console.log("#" + device_id + ":" + token + "$" + os + ":" + ver);
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
