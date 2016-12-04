@@ -3,7 +3,7 @@ var router = express.Router();
 var pg = require('pg');
 
 router.get('/', function(request, response, next) {
-    var group_id = request.params.gp;
+    var group_id = request.query.gp;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {

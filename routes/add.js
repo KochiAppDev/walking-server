@@ -7,9 +7,9 @@ var SERVER_API_KEY = process.env.FCM_API_KEY;
 var fcmCli= new FCM(SERVER_API_KEY);
 
 router.get('/', function(request, response, next) {
-    var user1_id = request.params.u1;
-    var user2_id = request.params.u2;
-    var group_id = request.params.gp;
+    var user1_id = request.query.u1;
+    var user2_id = request.query.u2;
+    var group_id = request.query.gp;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {

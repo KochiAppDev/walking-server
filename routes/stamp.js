@@ -3,9 +3,9 @@ var router = express.Router();
 var pg = require('pg');
  
 router.get('/', function(request, response, next) {
-    var user_id = request.params.id;
-    var receive_id = request.params.to;
-    var message = request.params.ms;
+    var user_id = request.query.id;
+    var receive_id = request.query.to;
+    var message = request.query.ms;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {

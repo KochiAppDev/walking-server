@@ -3,17 +3,17 @@ var router = express.Router();
 var pg = require('pg');
 
 router.get('/', function(request, response, next) {
-    var user_id = request.params.id;
-    var conf0 = request.params.c0;
-    var conf1 = request.params.c1;
-    var conf2 = request.params.c2;
-    var conf3 = request.params.c3;
-    var conf4 = request.params.c4;
-    var conf5 = request.params.c5;
-    var conf6 = request.params.c6;
-    var conf7 = request.params.c7;
-    var conf8 = request.params.c8;
-    var conf9 = request.params.c9;
+    var user_id = request.query.id;
+    var conf0 = request.query.c0;
+    var conf1 = request.query.c1;
+    var conf2 = request.query.c2;
+    var conf3 = request.query.c3;
+    var conf4 = request.query.c4;
+    var conf5 = request.query.c5;
+    var conf6 = request.query.c6;
+    var conf7 = request.query.c7;
+    var conf8 = request.query.c8;
+    var conf9 = request.query.c9;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {

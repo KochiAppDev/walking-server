@@ -3,9 +3,9 @@ var router = express.Router();
 var pg = require('pg');
  
 router.get('/', function(request, response, next) {
-    var user_id = request.params.id;
-    var user_name = request.params.nm;
-    var icon = request.params.ic;
+    var user_id = request.query.id;
+    var user_name = request.query.nm;
+    var icon = request.query.ic;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {

@@ -3,9 +3,9 @@ var router = express.Router();
 var pg = require('pg');
 
 router.get('/', function(request, response, next) {
-    var user_id = request.params.id;
-    var lat = request.params.lt;
-    var lon = request.params.ln;
+    var user_id = request.query.id;
+    var lat = request.query.lt;
+    var lon = request.query.ln;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
