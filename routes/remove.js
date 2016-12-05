@@ -32,7 +32,7 @@ var groupMember = function(response, client, group_id) {
     var ids = [];
     client.query(
         "SELECT token FROM user_info WHERE group_id=$1",
-       [group_id, user_id],
+       [group_id],
        function(err, result) {
            if (err) {
                console.log(err);
