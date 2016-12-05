@@ -41,8 +41,8 @@ var groupMember = function(response, client, group_id) {
                    ids[i] = result.rows[i].token;
                }
            }
+           otherMember(response, client, ids, user_id, group_id);
        }
-       otherMember(response, client, ids, user_id, group_id);
     );
 };
 
@@ -60,11 +60,11 @@ var otherMember = function(response, client, ids, user_id, group_id) {
                    u_id = result.rows[0].user_id;
                } 
            }
-       }
-       if (uid < 0) {
-           removeMember(response, client, ids, user_id);
-       } else {
-           removeMembers(response, client, ids, user_id, u_id);
+           if (uid < 0) {
+               removeMember(response, client, ids, user_id);
+           } else {
+               removeMembers(response, client, ids, user_id, u_id);
+           }
        }
     );
 };
@@ -89,7 +89,6 @@ var removeMember = function(response, client, ids, u1) {
 };
 
 var removeMembers = function(response, client, ids, u1, u2) {
-    var flag = false;
     client.query(
         "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id IN ($1, $2)",
        [u1, u2],
@@ -105,7 +104,6 @@ var removeMembers = function(response, client, ids, u1, u2) {
            }
            client.end();
        }
-       return flag;
     );
 };
 
