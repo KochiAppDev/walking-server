@@ -18,7 +18,7 @@ var userGroup = function(response, client, user_id) {
            } else {
                group_id = result.rows[0].group_id;
                if (group_id >= 0) {
-                   groupMember(response, client, group_id);
+                   groupMember(response, client, user_id, group_id);
                } else {
                    response.json({ "result": -1 });
                    client.end();
@@ -28,7 +28,7 @@ var userGroup = function(response, client, user_id) {
     );
 };
 
-var groupMember = function(response, client, group_id) {
+var groupMember = function(response, client, user_id, group_id) {
     var ids = [];
     client.query(
         "SELECT token FROM user_info WHERE group_id=$1",
