@@ -5,7 +5,7 @@ var FCM = require('fcm-node');
 var SERVER_API_KEY = process.env.FCM_API_KEY;
 var fcmCli= new FCM(SERVER_API_KEY);
 
-var userGroup = function(client, user_id) {
+var userGroup = function(response, client, user_id) {
     var group_id = -1;
     client.query(
         "SELECT group_id FROM user_info WHERE user_id=$1",
@@ -13,67 +13,22 @@ var userGroup = function(client, user_id) {
        function(err, result) {
            if (err) {
                console.log(err);
+               response.json({ "result": -1 });
+               client.end();
            } else {
                group_id = result.rows[0].group_id;
+               if (group_id >= 0) {
+                   groupMember(response, client, group_id);
+               } else {
+                   response.json({ "result": -1 });
+                   client.end();
+               }
            }
        }
-       return group_id;
     );
 };
 
-var otherMember = function(client, user_id, group_id) {
-    var u_id = -1;
-    client.query(
-        "SELECT user_id FROM user_info WHERE group_id=$1 and user_id!=$2",
-       [group_id, user_id],
-       function(err, result) {
-           if (err) {
-               console.log(err);
-           } else {
-               if (result.rows.length == 1) {
-                   u_id = result.rows[0].user_id;
-               } 
-           }
-       }
-       return u_id;
-    );
-};
-
-var removeMember = function(client, u1) {
-    var flag = false;
-    client.query(
-        "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id=$1",
-       [u1],
-       function(err, result) {
-           if (err) {
-               console.log(err);
-           } else {
-               flag = true;
-           }
-           client.end();
-       }
-       return flag;
-    );
-};
-
-var removeMembers = function(client, u1, u2) {
-    var flag = false;
-    client.query(
-        "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id IN ($1, $2)",
-       [u1, u2],
-       function(err, result) {
-           if (err) {
-               console.log(err);
-           } else {
-               flag = true;
-           }
-           client.end();
-       }
-       return flag;
-    );
-};
-
-var groupMember = function(client, group_id) {
+var groupMember = function(response, client, group_id) {
     var ids = [];
     client.query(
         "SELECT token FROM user_info WHERE group_id=$1",
@@ -87,9 +42,73 @@ var groupMember = function(client, group_id) {
                }
            }
        }
-       return ids;
+       otherMember(response, client, ids, user_id, group_id);
     );
 };
+
+
+var otherMember = function(response, client, ids, user_id, group_id) {
+    var u_id = -1;
+    client.query(
+        "SELECT user_id FROM user_info WHERE group_id=$1 and user_id!=$2",
+       [group_id, user_id],
+       function(err, result) {
+           if (err) {
+               console.log(err);
+           } else {
+               if (result.rows.length == 1) {
+                   u_id = result.rows[0].user_id;
+               } 
+           }
+       }
+       if (uid < 0) {
+           removeMember(response, client, ids, user_id);
+       } else {
+           removeMembers(response, client, ids, user_id, u_id);
+       }
+    );
+};
+
+var removeMember = function(response, client, ids, u1) {
+    client.query(
+        "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id=$1",
+       [u1],
+       function(err, result) {
+           if (err) {
+               console.log(err);
+               response.json({ "result": -1 });
+           } else {
+               response.json({ "result": 1 });
+               if (ids.length >= 0) {
+                   sendMulticast(ids);
+               }
+           }
+           client.end();
+       }
+    );
+};
+
+var removeMembers = function(response, client, ids, u1, u2) {
+    var flag = false;
+    client.query(
+        "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id IN ($1, $2)",
+       [u1, u2],
+       function(err, result) {
+           if (err) {
+               console.log(err);
+               response.json({ "result": -1 });
+           } else {
+               response.json({ "result": 1 });
+               if (ids.length >= 0) {
+                   sendMulticast(ids);
+               }
+           }
+           client.end();
+       }
+       return flag;
+    );
+};
+
 
 var sendMulticast = function(ids) {
     var payload = {
@@ -114,30 +133,7 @@ router.get('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        var group_id = userGroup(client, user_id);
-        if (group_id < 0) {
-            response.json({ "result": -1 });
-            client.end();
-        } else {
-            var ids = groupMember(client, group_id);
-            var other = otherMember(client, user_id, group_id);
-            
-            var rt = false;
-            if (other < 0) {
-                rt = removeMember(client, user_id);
-            } else {
-                // ‚»‚Ì‘¼ˆêl‚¾‚¯‘¶Ý
-                rt = removeMembers(client, user_id, other);
-            }
-            if (!rt) {
-                response.json({ "result": -1 });
-            } else {
-                response.json({ "result": 1 });
-                if (ids.length >= 0) {
-                    sendMulticast(ids);
-                }
-            }
-        }
+        userGroup(response, client, user_id);
     });  
 });
  
