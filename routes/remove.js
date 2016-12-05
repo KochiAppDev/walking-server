@@ -41,6 +41,7 @@ var groupMember = function(response, client, user_id, group_id) {
                    ids[i] = result.rows[i].token;
                }
            }
+           console.log("###[ ids=" + ids + "]" + group_id);
            otherMember(response, client, ids, user_id, group_id);
        }
     );
@@ -61,15 +62,15 @@ var otherMember = function(response, client, ids, user_id, group_id) {
                } 
            }
            if (u_id < 0) {
-               removeMember(response, client, ids, user_id);
+               removeMember(response, client, ids, user_id, group_id);
            } else {
-               removeMembers(response, client, ids, user_id, u_id);
+               removeMembers(response, client, ids, user_id, u_id, group_id);
            }
        }
     );
 };
 
-var removeMember = function(response, client, ids, u1) {
+var removeMember = function(response, client, ids, u1, group_id) {
     client.query(
         "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id=$1",
        [u1],
@@ -79,16 +80,14 @@ var removeMember = function(response, client, ids, u1) {
                response.json({ "result": -1 });
            } else {
                response.json({ "result": 1 });
-               if (ids.length >= 0) {
-                   sendMulticast(ids);
-               }
+               sendMulticast(ids, group_id);
            }
            client.end();
        }
     );
 };
 
-var removeMembers = function(response, client, ids, u1, u2) {
+var removeMembers = function(response, client, ids, u1, u2, group_id) {
     client.query(
         "UPDATE user_info SET group_id=-1, update_time=now() WHERE user_id IN ($1, $2)",
        [u1, u2],
@@ -98,9 +97,7 @@ var removeMembers = function(response, client, ids, u1, u2) {
                response.json({ "result": -1 });
            } else {
                response.json({ "result": 1 });
-               if (ids.length >= 0) {
-                   sendMulticast(ids);
-               }
+               sendMulticast(ids, group_id);
            }
            client.end();
        }
@@ -108,21 +105,23 @@ var removeMembers = function(response, client, ids, u1, u2) {
 };
 
 
-var sendMulticast = function(ids) {
-    var payload = {
-        registration_ids:ids,
-        data: {
-            order : "group",
-            group : group_id
-        },
-        priority: 'high',
-        content_available: true,
-        notification: { sound : "", badge: "-1" }
-    };
+var sendMulticast = function(ids, group_id) {
+    if (ids.length >= 0) {
+        var payload = {
+            registration_ids:ids,
+            data: {
+                order : "group",
+                group : group_id
+            },
+            priority: 'high',
+            content_available: true,
+            notification: { sound : "", badge: "-1" }
+        };
 
-    fcmCli.send(payload,function(err,res){
-        console.log("###[ err=" + err + ", res=" + res + "]");
-    });
+        fcmCli.send(payload,function(err,res){
+            console.log("###[ err=" + err + ", res=" + res + "]");
+        });
+    }
 };
 
  
