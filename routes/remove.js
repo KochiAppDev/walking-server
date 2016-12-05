@@ -60,7 +60,7 @@ var otherMember = function(response, client, ids, user_id, group_id) {
                    u_id = result.rows[0].user_id;
                } 
            }
-           if (uid < 0) {
+           if (u_id < 0) {
                removeMember(response, client, ids, user_id);
            } else {
                removeMembers(response, client, ids, user_id, u_id);
