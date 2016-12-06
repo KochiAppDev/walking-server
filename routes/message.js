@@ -19,20 +19,20 @@ var messageAction = function(response, client, message_id) {
 };
 
 router.get('/', function(request, response, next) {
-    var user_id = request.query.id;
+    var message_id = request.query.id;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        messageAction(response, client, user_id);
+        messageAction(response, client, message_id);
     });
 });
  
 router.post('/', function(request, response, next) {
-    var user_id = request.body.id;
+    var message_id = request.body.id;
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        messageAction(response, client, user_id);
+        messageAction(response, client, message_id);
     });
 });
  

@@ -96,7 +96,7 @@ var sendMulticast = function(ids, from_id, message_id, title, message) {
         var payload = {
             registration_ids:ids,
             data: {
-                order : "group",
+                order : "message",
                 message : message_id,
                 type : 0,
                 sender : from_id
