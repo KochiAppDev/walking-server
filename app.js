@@ -11,7 +11,7 @@ if (process.env.DATABASE_URL === void 0) {
 }
 
 var index = require('./routes/index');
-var users = require('./routes/users');
+//var users = require('./routes/users');
 
 var device = require('./routes/device');
 var token = require('./routes/token');
@@ -29,6 +29,7 @@ var plain = require('./routes/plain');
 var stamp = require('./routes/stamp');
 var picture = require('./routes/picture');
 var message = require('./routes/message');
+var talk = require('./routes/talk');
 
 var app = express();
 
@@ -45,7 +46,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/users', users);
+//app.use('/users', users);
 app.use('/device', device);
 app.use('/token', token);
 app.use('/init', init);
@@ -62,6 +63,7 @@ app.use('/plain', plain);
 app.use('/stamp', stamp);
 app.use('/picture', picture);
 app.use('/message', message);
+app.use('/talk', talk);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

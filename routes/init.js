@@ -1,6 +1,33 @@
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
+
+var initAction = function(response, client, user_id, user_name, user_type, icon) {
+    client.query(
+        "UPDATE user_info SET user_name=$1, user_type=$2, icon=$3, update_time=now() WHERE user_id=$4",
+        [user_name, user_type, icon, user_id],
+        function(err, result) {
+            if (err) {
+                console.log(err);
+                response.status(500).json({ "result": -1 });
+                client.end();
+            } else {
+                response.status(200).json({ "result": 1 });
+                if (user_type == 1) {
+                   client.query(
+                       "INSERT INTO user_location (user_id, update_time) VALUES ($1, now())",
+                       [user_id],
+                       function(err, result) {
+                           client.end();
+                       }
+                   );
+                } else {
+                    client.end();
+                }
+            }
+        }
+    );
+};
  
 router.get('/', function(request, response, next) {
     var user_id = request.query.id;
@@ -10,33 +37,7 @@ router.get('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        client.query(
-            "UPDATE user_info SET user_name=$1, user_type=$2, icon=$3, update_time=now() WHERE user_id=$4",
-            [user_name, user_type, icon, user_id],
-            function(err, result) {
-                if (err) {
-                    console.log(err);
-                    response.json({ "result": -1 });
-                    client.end();
-                } else {
-                    response.json({ "result": 1 });
-                    if (user_type == 1) { // éqãüÇÃèÍçá
-                        client.query(
-                            "INSERT INTO user_location (user_id, update_time) VALUES ($1, now())",
-                            [user_id],
-                            function(err, result) {
-                                if (err) {
-                                    console.log(err);
-                                }
-                                client.end();
-                            }
-                        );
-                    } else {
-                        client.end();
-                    }
-                }
-            }
-        );
+        initAction(response, client, user_id, user_name, user_type, icon);
     });
 });
  
@@ -48,33 +49,7 @@ router.post('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        client.query(
-            "UPDATE user_info SET user_name=$1, user_type=$2, icon=$3, update_time=now() WHERE user_id=$4",
-            [user_name, user_type, icon, user_id],
-            function(err, result) {
-                if (err) {
-                    console.log(err);
-                    response.json({ "result": -1 });
-                    client.end();
-                } else {
-                    response.json({ "result": 1 });
-                    if (user_type == 1) { // éqãüÇÃèÍçá
-                        client.query(
-                            "INSERT INTO user_location (user_id, update_time) VALUES ($1, now())",
-                            [user_id],
-                            function(err, result) {
-                                if (err) {
-                                    console.log(err);
-                                }
-                                client.end();
-                            }
-                        );
-                    } else {
-                        client.end();
-                    }
-                }
-            }
-        );
+        initAction(response, client, user_id, user_name, user_type, icon);
     });
 });
  

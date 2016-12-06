@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
+
 var FCM = require('fcm-node');
 var SERVER_API_KEY = process.env.FCM_API_KEY;
 var fcmCli= new FCM(SERVER_API_KEY);
 
-var userGroup = function(response, client, user_id) {
+var removeAction = function(response, client, user_id) {
     var group_id = -1;
     client.query(
         "SELECT group_id FROM user_info WHERE user_id=$1",
@@ -129,7 +130,7 @@ router.get('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        userGroup(response, client, user_id);
+        removeAction(response, client, user_id);
     });  
 });
  
@@ -138,7 +139,7 @@ router.post('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        userGroup(response, client, user_id);
+        removeAction(response, client, user_id);
     });  
 });
  

@@ -2,6 +2,60 @@ var express = require('express');
 var router = express.Router();
 var pg = require('pg');
 
+var FCM = require('fcm-node');
+var SERVER_API_KEY = process.env.FCM_API_KEY;
+var fcmCli= new FCM(SERVER_API_KEY);
+
+var settingAction = function(response, client, user_id, conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9) {
+    client.query(
+        "UPDATE user_info SET conf0=$1, conf1=$2, conf2=$3, conf3=$4, conf4=$5, conf5=$6, conf6=$7, conf7=$8, conf8=$9, conf9=$10, update_time=now() WHERE user_id=$11",
+        [conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9, user_id],
+        function(err, result) {
+            if (err) {
+                console.log(err);
+                response.status(500).json({ "result": -1 });
+                client.end();
+            } else {
+                singleMember(client, user_id);
+            }
+        }
+    );
+};
+
+var singleMember = function(client, to_id) {
+    var ids = [];
+    client.query(
+        "SELECT token FROM user_info WHERE user_id=$1",
+       [to_id],
+       function(err, result) {
+           if (err) {
+               console.log(err);
+           } else {
+               var to_id = result.rows[0].token;
+               sendSingle(to_id);
+           }
+           client.end();
+       }
+    );
+};
+ 
+var sendSingle = function(to_id) {
+   var payload = {
+       to:to_id,
+       data: {
+           order : "setting"
+       },
+       priority: 'high',
+       content_available: true,
+       notification: { sound : "", badge: "-1" }
+   };
+
+   fcmCli.send(payload,function(err,res){
+       console.log("###[ err=" + err + ", res=" + res + "]");
+   });
+};
+
+
 router.get('/', function(request, response, next) {
     var user_id = request.query.id;
     var conf0 = request.query.c0;
@@ -17,19 +71,7 @@ router.get('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        client.query(
-            "UPDATE user_info SET conf0=$1, conf1=$2, conf2=$3, conf3=$4, conf4=$5, conf5=$6, conf6=$7, conf7=$8, conf8=$9, conf9=$10, update_time=now() WHERE user_id=$11",
-            [conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9, user_id],
-            function(err, result) {
-                if (err) {
-                    console.log(err);
-                    response.json({ "result": -1 });
-                } else {
-                    response.json({ "result": 1 });
-                }
-                client.end();
-            }
-        );
+        settingAction(response, client, user_id, conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9);
     });
 });
   
@@ -48,19 +90,7 @@ router.post('/', function(request, response, next) {
     
     var con = process.env.DATABASE_URL;
     pg.connect(con, function(err, client) {
-        client.query(
-            "UPDATE user_info SET conf0=$1, conf1=$2, conf2=$3, conf3=$4, conf4=$5, conf5=$6, conf6=$7, conf7=$8, conf8=$9, conf9=$10, update_time=now() WHERE user_id=$11",
-            [conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9, user_id],
-            function(err, result) {
-                if (err) {
-                    console.log(err);
-                    response.json({ "result": -1 });
-                } else {
-                    response.json({ "result": 1 });
-                }
-                client.end();
-            }
-        );
+        settingAction(response, client, user_id, conf0, conf1, conf2, conf3, conf4, conf5, conf6, conf7, conf8, conf9);
     });
 });
  
