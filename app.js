@@ -13,23 +13,23 @@ if (process.env.DATABASE_URL === void 0) {
 var index = require('./routes/index');
 //var users = require('./routes/users');
 
-var device = require('./routes/device');
-var token = require('./routes/token');
-var init = require('./routes/init');
-var config = require('./routes/config');
-var setting = require('./routes/setting');
-var info = require('./routes/info');
-var location = require('./routes/location');
-var position = require('./routes/position');
-var route = require('./routes/route');
-var add = require('./routes/add');
-var remove = require('./routes/remove');
-var group = require('./routes/group');
-var plain = require('./routes/plain');
-var stamp = require('./routes/stamp');
-var picture = require('./routes/picture');
-var message = require('./routes/message');
-var talk = require('./routes/talk');
+var routes_device = require('./routes/device');
+var routes_token = require('./routes/token');
+var routes_init = require('./routes/init');
+var routes_config = require('./routes/config');
+var routes_setting = require('./routes/setting');
+var routes_info = require('./routes/info');
+var routes_location = require('./routes/location');
+var routes_position = require('./routes/position');
+var routes_route = require('./routes/route');
+var routes_add = require('./routes/add');
+var routes_remove = require('./routes/remove');
+var routes_group = require('./routes/group');
+var routes_plain = require('./routes/plain');
+var routes_stamp = require('./routes/stamp');
+var routes_picture = require('./routes/picture');
+var routes_message = require('./routes/message');
+var routes_talk = require('./routes/talk');
 
 var app = express();
 
@@ -47,23 +47,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 //app.use('/users', users);
-app.use('/device', device);
-app.use('/token', token);
-app.use('/init', init);
-app.use('/config', config);
-app.use('/setting', setting);
-app.use('/info', info);
-app.use('/location', location);
-app.use('/position', position);
-app.use('/route', route);
-app.use('/add', add);
-app.use('/remove', remove);
-app.use('/group', group);
-app.use('/plain', plain);
-app.use('/stamp', stamp);
-app.use('/picture', picture);
-app.use('/message', message);
-app.use('/talk', talk);
+app.use('/device', routes_device);
+app.use('/token', routes_token);
+app.use('/init', routes_init);
+app.use('/config', routes_config);
+app.use('/setting', routes_setting);
+app.use('/info', routes_info);
+app.use('/location', routes_location);
+app.use('/position', routes_position);
+app.use('/route', routes_route);
+app.use('/add', routes_add);
+app.use('/remove', routes_remove);
+app.use('/group', routes_group);
+app.use('/plain', routes_plain);
+app.use('/stamp', routes_stamp);
+app.use('/picture', routes_picture);
+app.use('/message', routes_message);
+app.use('/talk', routes_talk);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

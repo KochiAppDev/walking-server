@@ -1,19 +1,21 @@
 var express = require('express');
 var router = express.Router();
-var pg = require('pg');
+var pool = require('../lib/db_pool');
 
-var locationAction = function(response, client, user_id, lat, lon) {
+var locationAction = function(response, client, done, user_id, lat, lon) {
+    console.log("#UPDATE Location [" + lat + ":" + lon + "]");
     client.query(
-        "UPDATE user_location SET latitude=$1, longitude=$2, update_time=now() WHERE user_id=$3",
+//        "UPDATE user_location SET latitude=$1, longitude=$2, update_time=now() WHERE user_id=$3",
+        "INSERT INTO user_location (latitude, longitude, user_id, update_time) VALUES ($1, $2, $3, now())",
         [lat, lon, user_id],
         function(err, result) {
+            done();
             if (err) {
                 console.log(err);
                 response.status(500).json({ "result": -1 });
             } else {
                 response.status(200).json({ "result": 1 });
             }
-            client.end();
         }
     );
 };
@@ -23,9 +25,8 @@ router.get('/', function(request, response, next) {
     var lat = request.query.lt;
     var lon = request.query.ln;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        locationAction(response, client, user_id, lat, lon);
+    pool.connect(function(err, client, done) {
+        locationAction(response, client, done, user_id, lat, lon);
     });
 });
  
@@ -34,9 +35,8 @@ router.post('/', function(request, response, next) {
     var lat = request.body.lt;
     var lon = request.body.ln;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        locationAction(response, client, user_id, lat, lon);
+    pool.connect(function(err, client, done) {
+        locationAction(response, client, done, user_id, lat, lon);
     });
 });
  

@@ -1,19 +1,19 @@
 var express = require('express');
 var router = express.Router();
-var pg = require('pg');
+var pool = require('../lib/db_pool');
  
-var tokenAction = function(response, client, user_id, token, os, ver) {
+var tokenAction = function(response, client, done, user_id, token, os, ver) {
     client.query(
         "UPDATE user_info SET os_type=$1, os_version=$2, token=$3, update_time=now() WHERE user_id=$4",
         [os, ver, token, user_id],
         function(err, result) {
+            done();
             if (err) {
                 console.log(err);
                 response.status(500).json({ "result": -1 });
             } else {
                 response.status(200).json({ "result": 1 });
             }
-            client.end();
         }
     );
 };
@@ -24,9 +24,8 @@ router.get('/', function(request, response, next) {
     var os = request.query.os;
     var ver = request.query.vr;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        tokenAction(response, client, user_id, token, os, ver);
+    pool.connect(function(err, client, done) {
+        tokenAction(response, client, done, user_id, token, os, ver);
     });
 });
  
@@ -36,9 +35,8 @@ router.post('/', function(request, response, next) {
     var os = request.body.os;
     var ver = request.body.vr;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        tokenAction(response, client, user_id, token, os, ver);
+    pool.connect(function(err, client, done) {
+        tokenAction(response, client, done, user_id, token, os, ver);
     });
 });
  

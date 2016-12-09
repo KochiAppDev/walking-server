@@ -1,38 +1,35 @@
 var express = require('express');
 var router = express.Router();
-var pg = require('pg');
+var pool = require('../lib/db_pool');
+var fcmCli = require('../lib/fcm');;
 
-var FCM = require('fcm-node');
-var SERVER_API_KEY = process.env.FCM_API_KEY;
-var fcmCli= new FCM(SERVER_API_KEY);
-
-var plainAction = function(response, client, user_id, receive_id, message) {
+var plainAction = function(response, client, done, user_id, receive_id, message) {
     client.query(
         "SELECT user_name, group_id FROM user_info WHERE user_id=$1 AND group_id>=0",
        [user_id],
        function(err, result) {
            if (err) {
+                done();
                 console.log(err);
                 response.status(500).json({ "message_id": -1 });
-                client.end();
            } else {
                var title = result.rows[0].user_name + " から";
                var group_id = result.rows[0].group_id;
-               insertMessage(response, client, user_id, receive_id, title, message, group_id);
+               insertMessage(response, client, done, user_id, receive_id, title, message, group_id);
            }
        }
     );
 };
 
-var insertMessage = function(response, client, user_id, receive_id, title, message, group_id) {
+var insertMessage = function(response, client, done, user_id, receive_id, title, message, group_id) {
     client.query(
         "INSERT INTO message (message_from, message_to, message_type, plain, create_time) VALUES ($1, $2, 0, $3, now()) RETURNING message_id",
         [user_id, receive_id, message],
         function(err, result) {
             if (err) {
+                done();
                 console.log(err);
                 response.status(500).json({ "message_id": -1 });
-                client.end();
             } else {
                 var message_id = result.rows[0].message_id;
                 response.status(200).json({ "message_id": message_id });
@@ -41,22 +38,23 @@ var insertMessage = function(response, client, user_id, receive_id, title, messa
                 }
                 if (receive_id == -1) {
                     // グループ送信
-                    groupMember(client, user_id, group_id, message_id, title, message);
+                    groupMember(client, done, user_id, group_id, message_id, title, message);
                 } else {
                     // 1対1送信
-                    singleMember(client, user_id, receive_id, message_id, title, message)
+                    singleMember(client, done, user_id, receive_id, message_id, title, message)
                 }
             }
         }
     );
 };
 
-var groupMember = function(client, user_id, group_id, message_id, title, message) {
+var groupMember = function(client, done, user_id, group_id, message_id, title, message) {
     var ids = [];
     client.query(
         "SELECT token FROM user_info WHERE user_id!=$1 AND group_id=$2",
        [user_id, group_id],
        function(err, result) {
+           done();
            if (err) {
                console.log(err);
            } else {
@@ -69,24 +67,23 @@ var groupMember = function(client, user_id, group_id, message_id, title, message
                    sendMulticast(ids, user_id, message_id, title, message);
                }
            }
-           client.end();
        }
     );
 };
 
-var singleMember = function(client, user_id, to_id, message_id, title, message) {
+var singleMember = function(client, done, user_id, to_id, message_id, title, message) {
     var ids = [];
     client.query(
         "SELECT token FROM user_info WHERE user_id=$1",
        [to_id],
        function(err, result) {
+           done();
            if (err) {
                console.log(err);
            } else {
                var to_id = result.rows[0].token;
                sendSingle(to_id, user_id, message_id, title, message);
            }
-           client.end();
        }
     );
 };
@@ -103,7 +100,7 @@ var sendMulticast = function(ids, from_id, message_id, title, message) {
             },
             priority: 'high',
             content_available: true,
-            notification: { title : title, body : message, sound : "default", badge: "1" }
+            notification: { title : title, body : message, sound : "", badge: "-1" }
         };
 
         fcmCli.send(payload,function(err,res){
@@ -123,7 +120,7 @@ var sendSingle = function(to_id, from_id, message_id, title, message) {
         },
         priority: 'high',
         content_available: true,
-        notification: { title : title, body : message, sound : "default", badge: "1" }
+        notification: { title : title, body : message, "sound" : "", badge: "-1" }
     };
 
     fcmCli.send(payload,function(err,res){
@@ -136,9 +133,8 @@ router.get('/', function(request, response, next) {
     var receive_id = request.query.to;
     var message = request.query.ms;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        plainAction(response, client, user_id, receive_id, message);
+    pool.connect(function(err, client, done) {
+        plainAction(response, client, done, user_id, receive_id, message);
     });
 });
  
@@ -147,9 +143,8 @@ router.post('/', function(request, response, next) {
     var receive_id = request.body.to;
     var message = request.body.ms;
     
-    var con = process.env.DATABASE_URL;
-    pg.connect(con, function(err, client) {
-        plainAction(response, client, user_id, receive_id, message);
+    pool.connect(function(err, client, done) {
+        plainAction(response, client, done, user_id, receive_id, message);
     });
 });
  
