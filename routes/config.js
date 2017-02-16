@@ -63,7 +63,7 @@ router.get('/', function(request, response, next) {
     var user_name = request.query.nm;
     var icon = request.query.ic;
     
-    pg.connect(function(err, client, done) {
+    pool.connect(function(err, client, done) {
         configAction(response, client, done, user_id, user_name, icon);
     });
 });
@@ -73,7 +73,7 @@ router.post('/', function(request, response, next) {
     var user_name = request.body.nm;
     var icon = request.body.ic;
     
-    pg.connect(function(err, client, done) {
+    pool.connect(function(err, client, done) {
         configAction(response, client, done, user_id, user_name, icon);
     });
 });
