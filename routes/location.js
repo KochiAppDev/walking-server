@@ -32,8 +32,8 @@ router.get('/', function(request, response, next) {
  
 router.post('/', function(request, response, next) {
     var user_id = request.body.id;
-    var lat = request.body.lt;
-    var lon = request.body.ln;
+    var lat = request.body.lat;
+    var lon = request.body.lon;
     
     pool.connect(function(err, client, done) {
         locationAction(response, client, done, user_id, lat, lon);
