@@ -6,7 +6,7 @@ var locationAction = function(response, client, done, user_id, lat, lon) {
     console.log("#UPDATE Location [" + lat + ":" + lon + "]");
     client.query(
         "UPDATE user_location SET latitude=$1, longitude=$2, update_time=now() WHERE user_id=$3 " +
-        "SELECT * FROM user_location"
+        "SELECT * FROM user_location;",
        // "INSERT INTO user_location (latitude, longitude, user_id, update_time) VALUES ($1, $2, $3, now())",
         [lat, lon, user_id],
         function(err, result) {
