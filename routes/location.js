@@ -5,8 +5,9 @@ var pool = require('../lib/db_pool');
 var locationAction = function(response, client, done, user_id, lat, lon) {
     console.log("#UPDATE Location [" + lat + ":" + lon + "]");
     client.query(
-//        "UPDATE user_location SET latitude=$1, longitude=$2, update_time=now() WHERE user_id=$3;"
-        "INSERT INTO user_location (latitude, longitude, user_id, update_time) VALUES ($1, $2, $3, now())",
+        "UPDATE user_location SET latitude=$1, longitude=$2, update_time=now() WHERE user_id=$3;" + 
+        "INSERT INTO user_location (latitude, longitude, user_id, update_time) SELECT $1, $2, $3, now() WHERE NOT EXISTS (SELECT 1 FROM table WHERE user_id=$3);",
+//        "INSERT INTO user_location (latitude, longitude, user_id, update_time) VALUES ($1, $2, $3, now())",
         [lat, lon, user_id],
         function(err, result) {
             done();
