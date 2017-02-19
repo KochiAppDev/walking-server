@@ -5,7 +5,7 @@ var pool = require('../lib/db_pool');
 var positionAction = function(response, client, done, user_id) {
     client.query(
 //        "SELECT user_id as id, latitude as lat, longitude as lon, route as rt, update_time as ts FROM user_location WHERE user_id=$1",
-        "SELECT user_id as id, latitude as lat, longitude as lon, update_time as ts FROM user_location WHERE user_id=$1 ",
+        "SELECT user_id as id, latitude as lat, longitude as lon, update_time as ts FROM user_location WHERE user_id=$1 limit 1",
         [user_id],
         function(err, result) {
             done();
