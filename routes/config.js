@@ -49,7 +49,7 @@ var sendMulticast = function(ids, user_id) {
             },
             priority: 'high',
             content_available: true,
-            notification: { sound : "", badge: "-1" }
+            notification: { sound : ""}//, badge: "-1" }
         };
 
         fcmCli.send(payload,function(err,res){
