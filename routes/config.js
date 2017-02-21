@@ -52,7 +52,6 @@ var sendMulticast = function(ids, user_id) {
             notification: { sound : "", badge: "-1" }
         };
 
-        console.log("FCM:"+fcmCli);
         fcmCli.send(payload,function(err,res){
             console.log("###[ err=" + err + ", res=" + res + "]");
         });
