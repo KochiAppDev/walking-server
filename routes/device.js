@@ -30,8 +30,8 @@ var deviceAction = function(response, client, done, device_id, token, os, ver) {
                 } else {
                     var user_id = result.rows[0].user_id;
                     client.query(
-                        "UPDATE user_info SET os_type=$1, os_version=$2, update_time=now() WHERE user_id=$3",
-                        [os, ver, user_id],
+                        "UPDATE user_info SET os_type=$1, os_version=$2, token=$3, update_time=now() WHERE user_id=$4",
+                        [os, ver, token, user_id],
                         function(err, result) {
                             done();
                             if (err) {
