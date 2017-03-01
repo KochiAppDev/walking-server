@@ -30,6 +30,7 @@ var routes_stamp = require('./routes/stamp');
 var routes_picture = require('./routes/picture');
 var routes_message = require('./routes/message');
 var routes_talk = require('./routes/talk');
+var routes_send = require('./routes/send');
 
 var app = express();
 
@@ -64,6 +65,7 @@ app.use('/stamp', routes_stamp);
 app.use('/picture', routes_picture);
 app.use('/message', routes_message);
 app.use('/talk', routes_talk);
+app.use('/send', routes_send);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
