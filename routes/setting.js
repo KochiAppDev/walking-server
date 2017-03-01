@@ -13,6 +13,7 @@ var settingAction = function(response, client, done, user_id, conf0, conf1, conf
                 console.log(err);
                 response.status(500).json({ "result": -1 });
             } else {
+                response.status(200).json({ "result": 1 });
                 singleMember(client, done, user_id);
             }
         }
